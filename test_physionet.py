@@ -27,9 +27,9 @@ if __name__ == "__main__":
     
     batch_size = 64
     if is_debug:
-        writer = SummaryWriter('/nethome/shong375/log/transformer1d/challenge2017/debug')
+        writer = SummaryWriter('log/transformer1d/challenge2017/debug')
     else:
-        writer = SummaryWriter('/nethome/shong375/log/transformer1d/challenge2017/first')
+        writer = SummaryWriter('log/transformer1d/challenge2017/first')
 
     # make data
     # preprocess_physionet() ## run this if you have no preprocessed data yet
@@ -42,10 +42,10 @@ if __name__ == "__main__":
     dataloader_test = DataLoader(dataset_test, batch_size=batch_size, drop_last=False)
     
     # make model
-    device = torch.device('cuda:6' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     kernel_size = 16
     stride = 2
-    n_block = 16
+    n_block = 64
     model = Transformer1d(
         n_classes=4, 
         n_length=window_size, 
@@ -57,7 +57,8 @@ if __name__ == "__main__":
         verbose = True)
     model.to(device)
     ## look model
-    prog_iter = tqdm(dataloader, desc="init", leave=False)
+#     prog_iter = tqdm(dataloader, desc="init", leave=False)
+    prog_iter = tqdm(dataloader, desc="init", leave=True)
     for batch_idx, batch in enumerate(prog_iter):
         input_x, input_y = tuple(t.to(device) for t in batch)
         pred = model(input_x)    
@@ -75,8 +76,9 @@ if __name__ == "__main__":
 
         # train
         model.train()
-        prog_iter = tqdm(dataloader, desc="Training", leave=False)
-        for batch_idx, batch in enumerate(prog_iter):
+#         prog_iter = tqdm(dataloader, desc="Training", leave=False)
+#         for batch_idx, batch in enumerate(prog_iter):
+        for batch_idx, batch in enumerate(dataloader):
 
             input_x, input_y = tuple(t.to(device) for t in batch)
             pred = model(input_x)
@@ -97,7 +99,8 @@ if __name__ == "__main__":
         model.eval()
         prog_iter_test = tqdm(dataloader_test, desc="Testing", leave=False)
         all_pred_prob = []
-        for batch_idx, batch in enumerate(prog_iter_test):
+#         for batch_idx, batch in enumerate(prog_iter_test):
+        for batch_idx, batch in enumerate(dataloader_test):
             input_x, input_y = tuple(t.to(device) for t in batch)
             pred = model(input_x)
             all_pred_prob.append(pred.cpu().data.numpy())

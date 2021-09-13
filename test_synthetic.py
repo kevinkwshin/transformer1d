@@ -33,7 +33,8 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=64)
     
     # make model
-    device = torch.device('cuda:4' if torch.cuda.is_available() else 'cpu')
+#     device = torch.device('cuda:6' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     ## change the hyper-parameters for your own data
     model = Transformer1d(
         n_classes=n_classes, 
@@ -53,7 +54,6 @@ if __name__ == "__main__":
     for batch_idx, batch in enumerate(prog_iter):
 
         input_x, input_y = tuple(t.to(device) for t in batch)
-        input_x = input_x.permute(2,0,1)
         pred = model(input_x)
 
         loss = loss_func(pred, input_y)
@@ -74,11 +74,11 @@ if __name__ == "__main__":
     all_pred_prob = []
     for batch_idx, batch in enumerate(prog_iter_test):
         input_x, input_y = tuple(t.to(device) for t in batch)
-        input_x = input_x.permute(2,0,1)
         pred = model(input_x)
         all_pred_prob.append(pred.cpu().data.numpy())
     all_pred_prob = np.concatenate(all_pred_prob)
     all_pred = np.argmax(all_pred_prob, axis=1)
+    
     ## classification report
     print(classification_report(all_pred, label_test))
     

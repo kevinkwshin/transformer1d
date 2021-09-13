@@ -6,6 +6,8 @@ import pickle
 from sklearn.model_selection import train_test_split
 from collections import Counter
 from tqdm import tqdm
+import pandas as pd
+from collections import Counter
 
 def preprocess_physionet():
     """
@@ -13,25 +15,25 @@ def preprocess_physionet():
     """
     
     # read label
-    label_df = pd.read_csv('challenge2017/REFERENCE-v3.csv', header=None)
+    label_df = pd.read_csv('physionet.org/files/challenge-2017/1.0.0/REFERENCE-v3.csv', header=None)
     label = label_df.iloc[:,1].values
     print(Counter(label))
 
     # read data
     all_data = []
-    filenames = pd.read_csv('challenge2017/training2017/RECORDS', header=None)
+    filenames = pd.read_csv('physionet.org/files/challenge-2017/1.0.0/training/RECORDS', header=None)
     filenames = filenames.iloc[:,0].values
     print(filenames)
     for filename in tqdm(filenames):
-        mat = scipy.io.loadmat('challenge2017/training2017/{0}.mat'.format(filename))
+        mat = scipy.io.loadmat('physionet.org/files/challenge-2017/1.0.0/training/{0}.mat'.format(filename))
         mat = np.array(mat['val'])[0]
         all_data.append(mat)
     all_data = np.array(all_data)
 
     res = {'data':all_data, 'label':label}
-    with open('challenge2017/challenge2017.pkl', 'wb') as fout:
+    with open('physionet.org/files/challenge-2017/1.0.0/challenge2017.pkl', 'wb') as fout:
         pickle.dump(res, fout)
-
+        
 def slide_and_cut(X, Y, window_size, stride, output_pid=False):
     out_X = []
     out_Y = []
@@ -61,7 +63,7 @@ def slide_and_cut(X, Y, window_size, stride, output_pid=False):
 def read_data_physionet_2(window_size=3000, stride=500):
 
     # read pkl
-    with open('../data/challenge2017/challenge2017.pkl', 'rb') as fin:
+    with open('physionet.org/files/challenge-2017/1.0.0/challenge2017.pkl', 'rb') as fin:
         res = pickle.load(fin)
     ## scale data
     all_data = res['data']
@@ -104,7 +106,7 @@ def read_data_physionet_2(window_size=3000, stride=500):
 def read_data_physionet_4(window_size=3000, stride=500):
 
     # read pkl
-    with open('../data/challenge2017/challenge2017.pkl', 'rb') as fin:
+    with open('physionet.org/files/challenge-2017/1.0.0/challenge2017.pkl', 'rb') as fin:
         res = pickle.load(fin)
     ## scale data
     all_data = res['data']
